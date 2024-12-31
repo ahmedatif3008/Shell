@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 void shell_loop(void){
     char *line = malloc(1024); //line from the user
@@ -18,6 +19,8 @@ void shell_loop(void){
         
         if (scanf(" %1023[^\n]", line) == 1){
             printf("%s \n", line);
+            args = strtok(line, " ");
+            printf(" %s" args);
         }
         else {
             fprintf(stderr, "printing failed \n");
