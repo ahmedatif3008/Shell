@@ -4,6 +4,9 @@
 
 
 #define LSH_RL_BUFSIZE 1024
+#define TOK_BUFSIZE 64
+#define TOK_DELIM " \t\r\n\a"
+
 
 char *read_line(void) {
     int bufsize = LSH_RL_BUFSIZE;
@@ -44,6 +47,46 @@ char *read_line(void) {
 }
 
 
+
+
+char** parse_line(char *line){
+    int buf_size = TOK_BUFSIZE;
+    int position = 0;
+    char **tokens = malloc(buf_size * sizeof(char*));
+    char *token;
+
+    if (!tokens){
+        printf("malloc failed");
+        exit(EXIT_FAILURE);
+    }
+
+    token = strtok(line, TOK_DELIM);
+
+    while (token != NULL){
+
+        tokens[position] = token;
+        position++;
+
+        if (position >= buf_size){
+            buf_size += LSH_RL_BUFSIZE;
+            tokens = realloc(tokens, buf_size * sizeof(char*));
+
+            if (!tokens) {
+                fprintf(stderr, "lsh: allocation error\n");
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        token = strtok(NULL, TOK_DELIM); // THIS? 
+
+    }
+
+    tokens[position] = NULL; // THIS?
+    return tokens;
+
+}
+
+
 void test_memory(char *memory, int size) {
     printf("Memory content:\n");
     for (int i = 0; i < size; i++) {
@@ -56,9 +99,10 @@ void test_memory(char *memory, int size) {
     printf("\n");
 }
 
+
 void shell_loop(void){
     char *line = malloc(1024); //line from the user
-    char *args; // arguments to the line
+    char **args; // arguments to the line
     int status = 1; // Status of the loop(0 or 1)
 
     if (line == NULL){
@@ -69,7 +113,9 @@ void shell_loop(void){
     while (status) {
         printf("$ ");
         line = read_line();  // Read input
-        test_memory(line, strlen(line) + 1);
+        // test_memory(line, strlen(line) + 1);
+
+        args = parse_line(line);
 
         // If input is empty, clear buffer and continue
         if (strlen(line) == 0) {
@@ -97,7 +143,6 @@ void shell_loop(void){
 
 int main(int argc, char **argv){
     shell_loop();
-
-
+    
     return 0;
 }
